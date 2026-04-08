@@ -1,4 +1,4 @@
 def bonjour(nom="Obi-Wan"):
-    print(f"Hello {nom} !")
+    print(f"Bonjour {nom} !")
 
 bonjour("Luke")
