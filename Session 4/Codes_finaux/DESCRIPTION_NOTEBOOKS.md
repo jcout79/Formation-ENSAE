@@ -1,0 +1,64 @@
+# Description des notebooks — Codes_finaux
+
+Ce document détaille ce que fait chaque notebook du dossier `Codes_finaux`. Pour la traçabilité (origine "Codes prof" / "Colab_Notebooks"), voir [README.md](README.md).
+
+## Série MNIST (classification d'images de chiffres manuscrits)
+
+| Fichier | Ce que fait le notebook |
+|---|---|
+| `MNIST_1_DNN_Keras.ipynb` | Charge le jeu de données MNIST (via `keras.datasets.mnist`), sépare train/valid/test, normalise les pixels, puis entraîne un réseau de neurones dense (DNN) simple avec Keras pour classifier les chiffres 0-9. Évalue l'exactitude sur le jeu de test. |
+| `MNIST_2_CNN_Keras.ipynb` | Même problème que MNIST_1, mais avec un réseau de neurones convolutif (CNN) : 2 blocs convolution + dropout + max pooling, suivis d'un DNN final. Montre comment les dimensions des images évoluent à chaque couche. |
+| `MNIST_3_CNN_PyTorch.ipynb` | Reprend la classification MNIST avec un CNN, mais implémenté en PyTorch (au lieu de Keras) : définition d'une classe `nn.Module`, `DataLoader`, boucle d'entraînement manuelle (forward/backward/optimizer.step). |
+| `MNIST_4_VGG16_Keras.ipynb` | Utilise le transfer learning : réutilise le réseau pré-entraîné VGG16 (`keras.applications.VGG16`) et l'adapte à la classification MNIST (préparation des images avec `preprocess_input`, ajout de couches finales). |
+| `MNIST_5_VGG16_augmente_Keras.ipynb` | Identique à MNIST_4 (VGG16), en ajoutant de la data augmentation via `ImageDataGenerator` (rotations, décalages, zoom...) pour améliorer la robustesse du modèle. |
+| `MNIST_Lecture.ipynb` | Notebook technique montrant comment lire directement les fichiers bruts MNIST au format IDX (fonctions `load_mnist_images`/`load_mnist_labels`), sans passer par l'API Keras, et afficher une image. |
+
+### Valeur ajoutée de chaque méthode et choix des packages — MNIST
+
+- **`MNIST_1_DNN_Keras.ipynb`** — *Valeur ajoutée* : sert de référence (baseline) pour mesurer l'apport des architectures plus complexes (CNN, transfer learning) introduites ensuite ; un DNN dense ignore la structure spatiale de l'image, donc ses performances plafonnent vite. *Choix du package* : Keras est choisi pour sa simplicité de prototypage (API `Sequential` très lisible) plutôt qu'un DNN écrit "à la main" en NumPy ou en PyTorch, ce qui convient bien à un premier exemple pédagogique.
+- **`MNIST_2_CNN_Keras.ipynb`** — *Valeur ajoutée* : le CNN exploite la structure 2D de l'image (convolutions locales, partage de poids), ce qui réduit drastiquement le nombre de paramètres par rapport à un DNN dense et améliore l'exactitude sur ce type de données. *Choix du package* : Keras reste pertinent car ses couches `Conv2D`/`MaxPooling2D` masquent la complexité mathématique de la convolution, permettant de se concentrer sur l'architecture plutôt que sur l'implémentation bas niveau.
+- **`MNIST_3_CNN_PyTorch.ipynb`** — *Valeur ajoutée* : montre le même CNN mais avec un contrôle explicite de la boucle d'entraînement (forward, backward, `optimizer.step()`), utile pour comprendre ce que Keras fait "sous le capot" et pour les cas où l'on a besoin de plus de flexibilité (pertes custom, entraînements non standards). *Choix du package* : PyTorch est préféré ici pour illustrer un style impératif/bas niveau, complémentaire de l'approche déclarative de Keras — un choix pédagogique de comparaison plutôt qu'une nécessité technique sur ce cas simple.
+- **`MNIST_4_VGG16_Keras.ipynb`** — *Valeur ajoutée* : le transfer learning permet de bénéficier de features déjà apprises sur un très grand jeu de données (ImageNet), ce qui peut accélérer l'apprentissage et améliorer la généralisation, même si VGG16 est surdimensionné pour un problème aussi simple que MNIST. *Choix du package* : `keras.applications` fournit VGG16 pré-entraîné avec son `preprocess_input` associé, évitant de re-télécharger/ré-implémenter l'architecture ; c'est l'option la plus rapide pour illustrer le transfer learning en Keras.
+- **`MNIST_5_VGG16_augmente_Keras.ipynb`** — *Valeur ajoutée* : la data augmentation (rotations, décalages, zoom) augmente artificiellement la diversité du jeu d'entraînement et réduit le surapprentissage, ce qui est particulièrement utile pour un modèle aussi volumineux que VGG16 sur peu de données. *Choix du package* : `ImageDataGenerator` de Keras est utilisé car il s'intègre nativement au pipeline d'entraînement (`fit`) sans code supplémentaire de gestion des transformations d'images.
+- **`MNIST_Lecture.ipynb`** — *Valeur ajoutée* : pédagogique — comprendre le format binaire IDX sous-jacent au jeu MNIST, utile pour travailler avec des données similaires qui ne seraient pas déjà emballées dans une API haut niveau. *Choix du package* : n'utilise volontairement aucun framework de deep learning, seulement `numpy`/lecture binaire, pour isoler la mécanique de chargement des données de celle du modèle.
+
+## Série ozone (régression sur données de pollution atmosphérique)
+
+| Fichier | Ce que fait le notebook |
+|---|---|
+| `ozone_complet_1_DNN_Keras_tuner.ipynb` | Entraîne un DNN Keras pour prédire une variable de pollution (ozone) à partir de données météo. Utilise `keras_tuner.RandomSearch` pour rechercher automatiquement les meilleurs hyperparamètres (nombre de couches, unités, etc.). |
+| `ozone_complet_2_DNN_Keras_Optuna.ipynb` | Même problème de régression ozone, mais l'optimisation d'hyperparamètres est faite avec `Optuna` à la place de KerasTuner. Inclut des visualisations de l'historique d'optimisation (`plot_optimization_history`). |
+
+### Valeur ajoutée de chaque méthode et choix des packages — ozone
+
+- **`ozone_complet_1_DNN_Keras_tuner.ipynb`** — *Valeur ajoutée* : automatise la recherche d'hyperparamètres (nombre de couches, d'unités...) au lieu de les fixer arbitrairement ou de les tester manuellement, ce qui gagne du temps et améliore souvent la performance finale du modèle de régression. *Choix du package* : `keras_tuner` est choisi pour son intégration directe avec Keras (on définit un `HyperModel` puis on appelle `RandomSearch.search()`), rendant la bascule d'un entraînement classique vers un entraînement avec recherche d'hyperparamètres très simple.
+- **`ozone_complet_2_DNN_Keras_Optuna.ipynb`** — *Valeur ajoutée* : Optuna utilise un algorithme d'échantillonnage plus intelligent (TPE) que la recherche aléatoire de KerasTuner, ce qui converge en général plus vite vers de bons hyperparamètres, et fournit des visualisations utiles pour analyser le processus d'optimisation. *Choix du package* : Optuna est agnostique du framework de deep learning (fonctionne aussi avec PyTorch, scikit-learn...), plus flexible et plus riche en fonctionnalités de suivi/visualisation que KerasTuner — ce notebook sert à comparer les deux approches sur le même problème.
+
+## Série spam (classification binaire spam / non-spam)
+
+| Fichier | Ce que fait le notebook |
+|---|---|
+| `spam_1_DNN_Keras_base.ipynb` | Charge le jeu de données spam (`spam.csv`), prépare les features, entraîne un DNN Keras "de base" pour classifier les emails en spam/non-spam, évalue les performances (matrice de confusion, courbes). |
+| `spam_2_DNN_Keras_dropout.ipynb` | Reprend spam_1 en ajoutant des couches de `Dropout` pour réduire le surapprentissage. |
+| `spam_3_DNN_Keras_callback.ipynb` | Reprend spam_1/2 en ajoutant un callback Keras (ex. `EarlyStopping`) pour arrêter l'entraînement automatiquement quand le modèle cesse de progresser. |
+| `spam_4_DNN_Keras_tuner.ipynb` | Reprend le problème spam avec une recherche automatique d'hyperparamètres via `keras_tuner.RandomSearch` (nombre de couches, unités, dropout...). |
+| `spam_5_DNN_Keras_Optuna.ipynb` | Même recherche d'hyperparamètres que spam_4, mais réalisée avec `Optuna` au lieu de KerasTuner. |
+| `spam_6_DNN_Pytorch.ipynb` | Reprend la classification spam avec un DNN implémenté en PyTorch (classe `DNN(nn.Module)` personnalisée, `TensorDataset`/`DataLoader`, boucle d'entraînement manuelle). |
+| `spam_1_DNN_Keras_base_Dropout.ipynb` | Variante Colab de spam_1 : DNN de base avec ajout de dropout, montage de Google Drive pour accéder aux données (différente de `spam_2_DNN_Keras_dropout.ipynb`). |
+| `spam_1_DNN_Keras_base_JC_avec annotations.ipynb` | Copie du notebook spam_1 de base, annotée par un(e) participant(e) ("JC") avec ses propres notes de compréhension, montage Google Drive. |
+| `spam_4_DNN_Keras_tuner_Colab_enrichi.ipynb` | Variante Colab enrichie de spam_4 : installe `keras-tuner` via pip, définit une fonction `build_model` très commentée avec des bornes explicites pour le nombre de couches, d'unités, le dropout et la patience de l'`EarlyStopping`. Contient une cellule en erreur (exécution incomplète). |
+
+### Valeur ajoutée de chaque méthode et choix des packages — spam
+
+- **`spam_1_DNN_Keras_base.ipynb`** — *Valeur ajoutée* : établit la baseline de référence pour toute la série spam, sur laquelle chaque notebook suivant ajoute une seule amélioration (dropout, callback, tuning...), ce qui permet de mesurer isolément l'effet de chaque technique. *Choix du package* : Keras pour la simplicité de définition du DNN et de la boucle `fit`/`evaluate`, adapté à un problème tabulaire de taille modeste.
+- **`spam_2_DNN_Keras_dropout.ipynb`** — *Valeur ajoutée* : le dropout désactive aléatoirement des neurones à l'entraînement, ce qui réduit le surapprentissage et améliore souvent la généralisation par rapport à la baseline spam_1. *Choix du package* : simple ajout de la couche `Dropout` de Keras, sans changer le reste du pipeline — illustre qu'une amélioration peut se faire en une ligne de code avec ce framework.
+- **`spam_3_DNN_Keras_callback.ipynb`** — *Valeur ajoutée* : l'`EarlyStopping` stoppe l'entraînement dès que la performance sur le jeu de validation cesse de s'améliorer, ce qui évite le surapprentissage et économise du temps de calcul par rapport à un nombre d'epochs fixé arbitrairement. *Choix du package* : utilise le module `keras.callbacks`, natif et bien intégré à `model.fit`, sans nécessiter de logique d'arrêt manuelle.
+- **`spam_4_DNN_Keras_tuner.ipynb`** — *Valeur ajoutée* : automatise le choix des hyperparamètres du DNN spam plutôt que de les fixer à la main, augmentant les chances de trouver une configuration plus performante. *Choix du package* : `keras_tuner.RandomSearch`, cohérent avec le choix déjà fait sur la série ozone, pour une recherche d'hyperparamètres directement branchée sur l'API Keras.
+- **`spam_5_DNN_Keras_Optuna.ipynb`** — *Valeur ajoutée* : permet de comparer, sur le même problème spam, l'efficacité d'Optuna (échantillonnage TPE) par rapport à la recherche aléatoire de KerasTuner utilisée dans spam_4. *Choix du package* : Optuna, pour ses capacités de visualisation et d'échantillonnage plus avancées, démontrées ici sur un cas de classification après l'avoir vu sur un cas de régression (ozone).
+- **`spam_6_DNN_Pytorch.ipynb`** — *Valeur ajoutée* : comme pour MNIST_3, permet de comparer l'implémentation Keras (haut niveau) et PyTorch (contrôle explicite) sur le même problème de classification spam, pour renforcer la compréhension des mécanismes internes d'entraînement. *Choix du package* : PyTorch choisi par souci de cohérence pédagogique avec la partie MNIST_3, pour montrer la portabilité de la logique DNN d'un framework à l'autre.
+- **`spam_1_DNN_Keras_base_Dropout.ipynb`** — *Valeur ajoutée* : même bénéfice que `spam_2_DNN_Keras_dropout.ipynb` (réduction du surapprentissage), mais dans un contexte Colab où l'accès aux données passe par Google Drive. *Choix du package* : Keras, identique à la version prof, le choix du package n'étant pas remis en cause par le changement d'environnement d'exécution (Colab vs local).
+- **`spam_1_DNN_Keras_base_JC_avec annotations.ipynb`** — *Valeur ajoutée* : valeur pédagogique pour le formateur, car les annotations reflètent la compréhension (et les éventuelles incompréhensions) d'un participant, utile pour identifier les points à re-expliquer. *Choix du package* : inchangé par rapport à `spam_1_DNN_Keras_base.ipynb` (Keras), seul le commentaire diffère.
+- **`spam_4_DNN_Keras_tuner_Colab_enrichi.ipynb`** — *Valeur ajoutée* : va plus loin que `spam_4_DNN_Keras_tuner.ipynb` en explicitant et commentant finement chaque borne de recherche d'hyperparamètres (bornes min/max/step pour les couches, unités, dropout, patience de l'EarlyStopping), ce qui en fait une meilleure base pédagogique malgré une cellule en erreur à corriger. *Choix du package* : ajoute `%pip install keras-tuner` car ce package n'est pas préinstallé sur Colab (contrairement à un environnement local où il aurait déjà été installé), une contrainte spécifique à l'environnement Colab plutôt qu'un choix technique différent.
+
+## Données
+- `spam.csv` : jeu de données brut utilisé par tous les notebooks de la série spam (emails avec leurs caractéristiques et le label spam/non-spam).
