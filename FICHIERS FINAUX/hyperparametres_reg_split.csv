@@ -1,0 +1,13 @@
+,valeur retenue
+nb_var_BIC,5.0
+nb_var_AIC,9.0
+alpha_lasso,0.039456904602750136
+alpha_elastic,0.0030409662021201266
+alpha_ridge,0.0001
+nb_comp_pcr,21.0
+nb_comp_pls,15.0
+nb_iter_gbm1,180.0
+nb_iter_gbm2,74.0
+nb_iter_gbms1,130.0
+nb_iter_gbms2,112.0
+nb_iter_cat,48.0

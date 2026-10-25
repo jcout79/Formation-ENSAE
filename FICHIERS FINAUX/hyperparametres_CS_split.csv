@@ -1,0 +1,9 @@
+features,hyperparametre,valeur retenue
+base,nb_var_BIC,4.0
+base,nb_var_AIC,6.0
+base,C_ridge,0.013547003552782514
+base,C_lasso,0.08078922625736432
+base,C_elast,0.04874792184516643
+base,nb_iter_gbm1,20.0
+base,nb_iter_gbm2,12.0
+base,nb_iter_cat,2.0
